@@ -31,3 +31,10 @@ export interface IBook extends Document {
     description: string;
     units: Types.ObjectId[];
 }
+
+export interface IUnit extends Document {
+    unitname: string;
+    description: string;
+    words: Types.ObjectId[];
+    bookId: mongoose.Types.ObjectId;
+}

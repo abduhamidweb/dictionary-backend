@@ -1,14 +1,10 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { IUnit } from '../interface/interface';
 
 // Words skhema va modelini import qilish
 
 // Unit skhema interfeysi
-interface IUnit extends Document {
-    unitname: string;
-    description: string;
-    words: Types.ObjectId[];
-    bookId: mongoose.Types.ObjectId;
-}
+
 
 // Unit skhemasi
 const unitSchema: Schema = new Schema<IUnit>({
