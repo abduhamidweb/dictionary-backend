@@ -1,13 +1,9 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { IBook } from '../interface/interface';
 
 // Units skhema va modelini import qilish
 
 // Book skhema interfeysi
-interface IBook extends Document {
-    bookname: string;
-    description: string;
-    units: Types.ObjectId[];
-}
 
 // Book skhemasi
 const bookSchema: Schema = new Schema<IBook>({

@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 export interface IPost extends Document {
     title: string;
@@ -25,4 +25,9 @@ export interface IProduct extends Document {
 export interface IClient extends Document {
     imgLink: string;
     href: string;
+}
+export interface IBook extends Document {
+    bookname: string;
+    description: string;
+    units: Types.ObjectId[];
 }
