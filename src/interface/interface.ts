@@ -38,3 +38,13 @@ export interface IUnit extends Document {
     words: Types.ObjectId[];
     bookId: mongoose.Types.ObjectId;
 }
+export interface IWord extends Document {
+    engWord: string;
+    uzbWord: string;
+    transcription: string;
+    role: 'user' | 'admin';
+    info?: string;
+    message?: string;
+    unitId: mongoose.Types.ObjectId;
+    imgLink?: string;
+}

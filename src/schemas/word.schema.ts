@@ -1,16 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IWord } from '../interface/interface';
 
 // Word skhema interfeysi
-interface IWord extends Document {
-    engWord: string;
-    uzbWord: string;
-    transcription: string;
-    role: 'user' | 'admin';
-    info?: string;
-    message?: string;
-    unitId: mongoose.Types.ObjectId;
-    imgLink?: string;
-}
+
 
 // Word skhemasi
 const wordSchema: Schema = new Schema<IWord>({
