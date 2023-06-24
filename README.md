@@ -1,1 +1,1 @@
-# Web application of the CodeCrefters
+# Web application of the Essential English words Uzbek translations
