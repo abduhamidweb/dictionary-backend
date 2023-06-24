@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Word from '../schemas/word.schema';
+import Word from '../schemas/word.schema.js';
 import { IWord } from '../interface/interface';
+import Unit from '../schemas/unit.schema.js';
 
 class WordController {
     public async createWord(req: Request, res: Response): Promise<void> {
@@ -8,6 +9,11 @@ class WordController {
         try {
             const word = new Word({ engWord, uzbWord, transcription, role, info, message, unitId, imgLink });
             await word.save();
+            await Unit.findByIdAndUpdate(unitId, {
+                $push: {
+                    words: word._id
+                }
+            });
             res.status(201).json(word);
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
@@ -16,7 +22,7 @@ class WordController {
 
     public async getAllWords(req: Request, res: Response): Promise<void> {
         try {
-            const words: IWord[] | null = await Word.find().populate('unitId');
+            const words: IWord[] | null = await Word.find();
 
             res.status(200).json(words);
         } catch (error: unknown) {
@@ -28,7 +34,7 @@ class WordController {
         const { id } = req.params;
 
         try {
-            const word: IWord | null = await Word.findById(id).populate('unitId');
+            const word: IWord | null = await Word.findById(id);
 
             if (!word) {
                 res.status(404).json({ error: 'Word not found' });

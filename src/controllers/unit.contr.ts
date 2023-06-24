@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Unit from '../schemas/unit.schema';
+import Unit from '../schemas/unit.schema.js';
 import { IUnit } from '../interface/interface';
+import Book from '../schemas/book.schema.js';
 
 class UnitController {
     public async createUnit(req: Request, res: Response): Promise<void> {
@@ -8,6 +9,11 @@ class UnitController {
         try {
             const unit = new Unit({ unitname, description, words, bookId });
             await unit.save();
+            await Book.findByIdAndUpdate(bookId, {
+                $push: {
+                    units: unit._id
+                }
+            });
             res.status(201).json(unit);
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
@@ -16,7 +22,7 @@ class UnitController {
 
     public async getAllUnits(req: Request, res: Response): Promise<void> {
         try {
-            const units: IUnit[] | null = await Unit.find().populate('words bookId');
+            const units: IUnit[] | null = await Unit.find().populate('words');
 
             res.status(200).json(units);
         } catch (error: unknown) {

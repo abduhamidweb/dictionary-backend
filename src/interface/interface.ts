@@ -41,8 +41,8 @@ export interface IUnit extends Document {
 export interface IWord extends Document {
     engWord: string;
     uzbWord: string;
-    transcription: string;
-    role: 'user' | 'admin';
+    transcription?: string;
+    role?:  'n'| 'v'| 'adj'| 'prep'
     info?: string;
     message?: string;
     unitId: mongoose.Types.ObjectId;

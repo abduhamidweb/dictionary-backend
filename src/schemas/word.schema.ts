@@ -8,7 +8,8 @@ import { IWord } from '../interface/interface';
 const wordSchema: Schema = new Schema<IWord>({
     engWord: {
         type: String,
-        required: true
+        unique: true,
+        required: true,
     },
     uzbWord: {
         type: String,
@@ -16,12 +17,10 @@ const wordSchema: Schema = new Schema<IWord>({
     },
     transcription: {
         type: String,
-        required: true
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        required: true
+        enum: ['n', 'v', 'adj', 'prep'],
     },
     info: {
         type: String

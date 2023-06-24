@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
-import User from '../schemas/user.schema';
+import User from '../schemas/user.schema.js';
+import { JWT } from '../utils/jwt.js';
 
 class UserController {
     public async createUser(req: Request, res: Response): Promise<void> {
         const { username } = req.body;
         try {
+            if (!username) throw new Error(`Username must be`);
             const user = new User({ username });
             await user.save();
-            res.status(201).json(user);
+            res.status(201).json({ success: true, data: user.username, token: JWT.SIGN({ id: user._id }) });
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
         }

@@ -7,7 +7,7 @@ const usersSchema: Schema = new Schema({
     password: String
 });
 
-const users = mongoose.model('users', usersSchema);
+const users = mongoose.model('admin', usersSchema);
 
 export default users;
 

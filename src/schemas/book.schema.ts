@@ -18,7 +18,7 @@ const bookSchema: Schema = new Schema<IBook>({
     units: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'Units'
+            ref: 'Unit'
         }
     ]
 });

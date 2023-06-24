@@ -10,7 +10,8 @@ import { IUnit } from '../interface/interface';
 const unitSchema: Schema = new Schema<IUnit>({
     unitname: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     description: {
         type: String,
@@ -19,7 +20,7 @@ const unitSchema: Schema = new Schema<IUnit>({
     words: [
         {
             type: Schema.Types.ObjectId,
-            ref: 'Words'
+            ref: 'Word'
         }
     ],
     bookId: {
