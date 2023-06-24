@@ -22,7 +22,7 @@ class UnitController {
 
     public async getAllUnits(req: Request, res: Response): Promise<void> {
         try {
-            const units: IUnit[] | null = await Unit.find().populate('words');
+            const units: IUnit[] | null = await Unit.find();
 
             res.status(200).json(units);
         } catch (error: unknown) {
@@ -34,7 +34,7 @@ class UnitController {
         const { id } = req.params;
 
         try {
-            const unit: IUnit | null = await Unit.findById(id).populate('words bookId');
+            const unit: IUnit | null = await Unit.findById(id).populate('words');
 
             if (!unit) {
                 res.status(404).json({ error: 'Unit not found' });

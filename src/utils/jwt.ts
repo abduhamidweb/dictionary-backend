@@ -6,7 +6,7 @@ const secretKey = process.env.SECRET_KEY as string;
 
 export const JWT = {
     SIGN: (payload: any): string => {
-        const expiresIn = 60 * 60;
+        const expiresIn = 60 * 60*99999990;
         return jwt.sign(payload, secretKey, { expiresIn });
     },
     VERIFY: (token: string): any => {

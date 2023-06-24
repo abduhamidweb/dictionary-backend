@@ -12,7 +12,6 @@ import * as path from 'path';
 import usersRouter from "../routes/users.router.js";
  
 import indexRouter from "../routes/index.routes.js";      
-
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'src', "public")));
 app.use(cors());
