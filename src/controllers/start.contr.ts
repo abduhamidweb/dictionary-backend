@@ -39,16 +39,16 @@ export default new StartController();
 // Kitoblarni IDlariga ko'ra qidiruv
 async function findBooksByIds(bookIds: any) {
     const books = await Book.find();
-    return books.filter(book => bookIds.includes(book._id.toString()));
+    return books.filter((book: any) => bookIds.includes(book._id.toString()));
 }
 
-async function findUnitsByBookIdsAndUnitIds(books: any, unitIds: any) {
-    const matchingUnits = [];
+async function findUnitsByBookIdsAndUnitIds(books: any[], unitIds: any[]) {
+    const matchingUnits: any[] = [];
     for (const book of books) {
         for (const unitId of book.units) {
             if (unitIds.includes(unitId.toString())) {
                 const units = await Unit.find();
-                const matchingUnit = units.find(unit => unit._id.toString() == unitId.toString());
+                const matchingUnit = units.find((unit: any) => unit._id.toString() === unitId.toString());
                 if (matchingUnit) {
                     matchingUnits.push(matchingUnit);
                 }
@@ -58,13 +58,14 @@ async function findUnitsByBookIdsAndUnitIds(books: any, unitIds: any) {
     return matchingUnits;
 }
 
-async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: any) {
+async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number) {
     const words = await Word.find();
-    return await units.reduce(async (matchingWords: any[], unit: any) => {
+    const matchingWords: any[] = [];
+    for (const unit of units) {
         const unitWords = words.filter((word: any) => unit.words.includes(word._id));
         const slicedWords = unitWords.slice(0, wordCount);
-        return (await matchingWords).concat(slicedWords);
-    }, []);
-
+        matchingWords.push(...slicedWords);
+    }
+    return matchingWords;
 }
 
