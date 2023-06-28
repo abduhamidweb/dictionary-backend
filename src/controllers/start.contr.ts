@@ -31,7 +31,7 @@ class StartController {
             const matchingWords = await findWordsByUnitIdsAndWordCount(matchingUnits, wordCount, sort);
 
             // Teng kelgan so'zlarni JSON formatida javob qiling
-            res.json(matchingWords);
+            res.send(matchingWords);
 
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
@@ -101,6 +101,9 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
         return {
             ...obj,
             variants: Array.from(new Set(obj.variants)),
+            question: obj.engWord,
+            inFact: obj.uzbWord, 
+
             role: "uzb"
 
         };
@@ -118,15 +121,25 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
         return {
             ...obj,
             variants: Array.from(new Set(obj.variants)),
+            inFact: obj.engWord,
+            question: obj.uzbWord, 
             role:"eng"
         };
     });
     // ikkisidaham bor bo'lgan arraylarni render qilib chiqarish kerak.
     const randomWords = shuffleArray(deduplicatedArrayEng.concat(deduplicatedArrayUzb), wordCount)
-
+    const deduplicatedRandomWords = randomWords.map(obj => {
+        return {
+            ...obj,
+            variants: Array.from(new Set(obj.variants)),
+            inFact: obj.engWord || obj.uzbWord,
+            question: obj.engWord || obj.uzbWord,
+            role: "random"
+        };
+    });
     // return qilayotganda deduplicatedArrayEng, deduplicatedArrayUzb, randomWords ni render qilsa o'ladi.
     // user nechtadir so'zni so'rasa o'shancha so'z random bo'ladi.
     if (sort == "uzb") return deduplicatedArrayUzb
     else if (sort == "eng") return deduplicatedArrayEng
-    else if (sort =="random") return randomWords
+    else if (sort == "random") return deduplicatedRandomWords
 }
