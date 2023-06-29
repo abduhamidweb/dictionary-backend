@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import Book from '../schemas/book.schema.js';
+import Unit from '../schemas/unit.schema.js';
 class EndController {
     public async end(req: Request, res: Response) {
         let data = req.body;
@@ -34,14 +36,19 @@ class EndController {
                         error.push(item);
                     }
                 }
-
                 return { correct, incorrect, error };
             }
             const result = processItems(data);
-            console.log('result :', result);
+            // console.log(result.correct.find(obj => obj._id)?._id);
+            // let bookId = await Unit.find({ _id:  })
+            // console.log('bookId :', bookId);
+            res.send({
+                correct: result.correct,
+                incorrect: result.incorrect
+            })
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
         }
     }
-} 
+}
 export default new EndController();  
