@@ -48,7 +48,7 @@ async function findUnitsByBookIdsAndUnitIds(books: any[], unitIds: any[]) {
     const matchingUnits: any[] = [];
     for (const book of books) {
         for (const unitId of book.units) {
-            if (unitIds.includes(unitId.toString())) {
+            if (unitIds.includes(unitId.toString())) { 
                 const units = await Unit.find();
                 const matchingUnit = units.find((unit: any) => unit._id.toString() === unitId.toString());
                 if (matchingUnit) {
@@ -59,7 +59,7 @@ async function findUnitsByBookIdsAndUnitIds(books: any[], unitIds: any[]) {
     }
     return matchingUnits;
 }
-async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, sort:string) {
+async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, sort: string) {
     const words = await Word.find();
     const matchingWords: any[] = [];
     for (const unit of units) {
@@ -102,7 +102,7 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
             ...obj,
             variants: Array.from(new Set(obj.variants)),
             question: obj.engWord,
-            inFact: obj.uzbWord, 
+            inFact: obj.uzbWord,
 
             role: "uzb"
 
@@ -122,21 +122,35 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
             ...obj,
             variants: Array.from(new Set(obj.variants)),
             inFact: obj.engWord,
-            question: obj.uzbWord, 
-            role:"eng"
+            question: obj.uzbWord,
+            role: "eng"
         };
     });
     // ikkisidaham bor bo'lgan arraylarni render qilib chiqarish kerak.
     const randomWords = shuffleArray(deduplicatedArrayEng.concat(deduplicatedArrayUzb), wordCount)
     const deduplicatedRandomWords = randomWords.map(obj => {
+        let variants = [];
+
+        if (obj.role === "eng") {
+            variants = shuffleArray(uzbWords, 3);
+            variants.push(obj.uzbWord);
+        } else {
+            variants = shuffleArray(engWords, 3);
+            variants.push(obj.engWord);
+        }
+
+        variants = Array.from(new Set(variants)); // Takrorlangan variantlarni olib tashlash
+
         return {
             ...obj,
-            variants: Array.from(new Set(obj.variants)),
-            inFact: obj.engWord || obj.uzbWord,
-            question: obj.engWord || obj.uzbWord,
+            variants: variants,
+            question: obj.role === "eng" ? obj.engWord : obj.uzbWord,
+            inFact: obj.role === "eng" ? obj.uzbWord : obj.engWord,
             role: "random"
         };
     });
+
+
     // return qilayotganda deduplicatedArrayEng, deduplicatedArrayUzb, randomWords ni render qilsa o'ladi.
     // user nechtadir so'zni so'rasa o'shancha so'z random bo'ladi.
     if (sort == "uzb") return deduplicatedArrayUzb
