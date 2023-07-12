@@ -10,8 +10,8 @@ import authMiddleware from "../middleware/auth.js";
 const router = express.Router();
 
 
-router.use('/books', authMiddleware, bookRouter)
-router.use('/units', authMiddleware, unitRouter)
+router.use('/books', authMiddleware, bookRouter);
+router.use('/units', authMiddleware, unitRouter);
 router.use('/users', userRouter)
 router.use('/start', authMiddleware, startRouter)
 router.use('/end', authMiddleware, endRouter)

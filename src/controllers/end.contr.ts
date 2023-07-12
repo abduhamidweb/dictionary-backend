@@ -28,7 +28,7 @@ class EndController {
                 const error: DataItem[] = [];
 
                 for (const item of data) {
-                    if (item.inFact === item.answer) {
+                    if (item.inFact == item.answer) {
                         correct.push(item);
                     } else if (item.answer) {
                         incorrect.push(item);
@@ -39,12 +39,10 @@ class EndController {
                 return { correct, incorrect, error };
             }
             const result = processItems(data);
-            // console.log(result.correct.find(obj => obj._id)?._id);
-            // let bookId = await Unit.find({ _id:  })
-            // console.log('bookId :', bookId);
             res.send({
                 correct: result.correct,
-                incorrect: result.incorrect
+                incorrect: result.incorrect,
+                errorRes: result.error
             })
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
