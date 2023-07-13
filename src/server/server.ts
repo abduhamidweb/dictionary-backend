@@ -9,9 +9,7 @@ import swaggerRouter from "../utils/swagger.js";
 
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
-app.use(cors({
-    origin: 'http://localhost:5173',
-}));
+app.use(cors());
 
 app.use(express.json());
 

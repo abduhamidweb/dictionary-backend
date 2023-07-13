@@ -10,7 +10,7 @@ export default async function authMiddleware(req: Request, res: Response, next: 
     }
     try {
         const decodedToken = JWT.VERIFY(token).id;
-        next();
+        if (decodedToken) next();
     } catch (error) {
         return res.status(401).json({
             error: 'Invalid token'
