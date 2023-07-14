@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Book from '../schemas/book.schema.js';
 import Unit from '../schemas/unit.schema.js';
 import { JWT } from '../utils/jwt.js';
+import User from '../schemas/user.schema.js';
 interface DataItem {
     _id: string;
     engWord: string;
@@ -28,11 +29,19 @@ class EndController {
         let data = req.body;
         let token: any = req.headers.token;
         let userId = JWT.VERIFY(token).id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(403).send("you do not have permission to access.");
+        }
         try {
             function processItems(data: DataItem[]): {
                 correct: DataItem[];
                 incorrect: DataItem[];
                 error: DataItem[];
+                correctCount: number;
+                incorrectCount: number;
+                correctPercentage: number;
+                incorrectPercentage: number;
             } {
                 const correct: ResultItem = { count: 0, words: [] };
                 const incorrect: ResultItem = { count: 0, words: [] };
@@ -50,32 +59,53 @@ class EndController {
                 }
                 let correctWords = correct.words;
                 let incorrectWords = incorrect.words;
+                let correctCount = correct.count;
+                let incorrectCount = incorrect.count;
 
-                return { correct: correctWords, incorrect: incorrectWords, error };
+                const totalCount = correctCount + incorrectCount;
+                const correctPercentage = Math.floor((correctCount / totalCount) * 100);
+                const incorrectPercentage = Math.floor((incorrectCount / totalCount) * 100);
+                return {
+                    correct: correctWords,
+                    incorrect: incorrectWords,
+                    error,
+                    correctCount,
+                    incorrectCount,
+                    correctPercentage,
+                    incorrectPercentage
+                };
             }
+
+
             const result = processItems(data);
+            console.log('result :', result);
+
+            // information about playgame;
+
             const unitIds = [
                 ...new Set([
                     ...result.correct.map((item) => item.unitId),
                     ...result.incorrect.map((item) => item.unitId),
-                ]), 
+                ]),
             ];
             const books = await Book.find();
             console.log(books.filter((book) =>
                 book.units.some((unitId) => unitIds.includes(unitId.toString()))
-            )); 
+            ));
+
+
 
             res.send({
                 correct: result.correct,
                 incorrect: result.incorrect,
                 errorRes: result.error
-            })
+            });
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
         }
     }
 }
-export default new EndController();  
+export default new EndController();
 
 // import { Request, Response } from 'express';
 // import Book from '../schemas/book.schema.js';
