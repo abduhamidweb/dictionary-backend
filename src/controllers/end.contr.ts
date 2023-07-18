@@ -130,6 +130,7 @@ class EndController {
                 user: user.username
             };
             // create information about the game
+            // console.log('resultData :', resultData);
             
        
             res.send({
@@ -139,10 +140,10 @@ class EndController {
                 errorRes: result.error
             });
             if (resultData.correct || resultData.incorrect) {
+                let answerWithUnit = await findMatchingUnits(resultData)
                 const newResult = new ResultSchema({ resultData });
                 await newResult.save();
-
-                sendResultsToChannel(newResult, booksName);
+                sendResultsToChannel(newResult, booksName, answerWithUnit);
             }
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
@@ -151,29 +152,114 @@ class EndController {
 }
 
 
-async function sendResultsToChannel(resultData: any, bookname: any) {
-try {
-    const bot = new Telegraf('6357487179:AAHyXXD-WZoGMIUfqZ0jBGEDM5dXnpnmaVg');
-    const channelId = '@EssentialWordsResult';
+async function sendResultsToChannel(resultData: any, bookname: any, answerWithUnit: any) {
+    try {
+        const bot = new Telegraf('6357487179:AAHyXXD-WZoGMIUfqZ0jBGEDM5dXnpnmaVg');
+        const channelId = '@EssentialWordsResult';
 
-    // Format results for Telegram message
-    const formattedResults = formatResults(resultData, bookname);
+        // Format results for Telegram message
+        const formattedResults = formatResults(resultData, bookname, answerWithUnit);
 
-    // Send message to Telegram channel
-    await bot.telegram.sendMessage(channelId, formattedResults);
-} catch (error) {
-    console.error('Error sending results to Telegram channel:', error);
+        // Send message to Telegram channel
+        await bot.telegram.sendMessage(channelId, formattedResults);
+    } catch (error) {
+        console.error('Error sending results to Telegram channel:', error);
+    }
 }
-}
+
 // Format results for Telegram message (customize as needed)
-function formatResults(resultData: any, bookname: any) {
+
+// Format results for Telegram message (customize as needed)
+function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
     let message = `✅ Tog'ri: ${resultData.resultData.correct.count}\n`;
     message += `❌ Noto'g'ri: ${resultData.resultData.incorrect.count}\n\n`;
-    message += `📚 Kitob nomi: ${bookname[0].bookname}\n`;
+    message += "📚 Kitob nomlari:\n";
 
-    // ... Qolgan ma'lumotlarni kerakli ko'rinishda qo'shing ...
+    for (const book of bookname) {
+        const bookname = book.bookname;
+        message += `    - ${bookname}\n`;
+    }
+    // Get unique unit names from correct and incorrect arrays
+    const allUnitNames = [...new Set([...answerWithUnit.correct.map((item: any) => item.unitName), ...answerWithUnit.incorrect.map((item: any) => item.unitName)])];
+
+    // Iterate through each unit to display found and not found words
+    for (const unitName of allUnitNames) {
+        const foundWords = answerWithUnit.correct.filter((item: any) => item.unitName === unitName);
+        const notFoundWords = answerWithUnit.incorrect.filter((item: any) => item.unitName === unitName);
+
+        // Display unit name
+        message += `📚 Kitob nomi: ${unitName}\n`;
+
+        // Display found words
+        message += "✅ Topilgan so'zlar: ";
+        if (foundWords.length > 0) {
+            for (const word of foundWords) {
+                message += `${word.uzbWord} (${word.engWord}), `;
+            }
+            message = message.slice(0, -2); // Remove the last comma and space
+            message += "\n";
+        } else {
+            message += "Yo'q\n";
+        }
+
+        // Display not found words
+        message += "❌ Topilmagan so'zlar: ";
+        if (notFoundWords.length > 0) {
+            for (const word of notFoundWords) {
+                message += `${word.uzbWord} (${word.engWord}), `;
+            }
+            message = message.slice(0, -2); // Remove the last comma and space
+            message += "\n";
+        } else {
+            message += "Yo'q\n";
+        }
+
+        message += "\n";
+    }
 
     return message;
+}
+
+async function findMatchingUnits(resultData:any) {
+    const correctWords = resultData.correct.words;
+    const incorrectWords = resultData.incorrect.words;
+
+    const correct = [];
+    const incorrect = [];
+
+    // Find matching words for correct results
+    for (const word of correctWords) {
+        const unit = await Unit.findById(word.unitId);
+        if (unit) {
+            correct.push({
+                _id: word._id,
+                engWord: word.engWord,
+                uzbWord: word.uzbWord,
+                unitName: unit.unitname,
+                question: word.question,
+                role: word.role,
+                answer: word.answer,
+            });
+        }
+    }
+
+    // Find matching words for incorrect results
+    for (const word of incorrectWords) {
+        const unit = await Unit.findById(word.unitId);
+        if (unit) {
+            incorrect.push({
+                _id: word._id,
+                engWord: word.engWord,
+                uzbWord: word.uzbWord,
+                unitName: unit.unitname,
+                question: word.question,
+                role: word.role,
+                answer: word.answer,
+            });
+        }
+    }
+
+    return { correct, incorrect };
 }
 
 
