@@ -188,10 +188,10 @@ function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
         message += `📚 Unit nomi: ${unitName}\n`;
 
         // Display found words
-        message += "✅ Topilgan so'zlar: ";
+        message += "✅ Topilgan so'zlar: \n";
         if (foundWords.length > 0) {
             for (const word of foundWords) {
-                message += `${word.uzbWord} (${word.engWord}), `;
+                message += `${word.uzbWord} (${word.engWord}),\n `;
             }
             message = message.slice(0, -2); // Remove the last comma and space
             message += "\n";
@@ -200,10 +200,10 @@ function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
         }
 
         // Display not found words
-        message += "❌ Topilmagan so'zlar: ";
+        message += "❌ Topilmagan so'zlar:\n";
         if (notFoundWords.length > 0) {
             for (const word of notFoundWords) {
-                message += `${word.uzbWord} (${word.engWord}), `;
+                message += `${word.uzbWord} (${word.engWord}),\n`;
             }
             message = message.slice(0, -2); // Remove the last comma and space
             message += "\n";
@@ -220,7 +220,6 @@ function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
 async function findMatchingUnits(resultData:any) {
     const correctWords = resultData.correct.words;
     const incorrectWords = resultData.incorrect.words;
-
     const correct = [];
     const incorrect = [];
 
@@ -239,7 +238,6 @@ async function findMatchingUnits(resultData:any) {
             });
         }
     }
-
     // Find matching words for incorrect results
     for (const word of incorrectWords) {
         const unit = await Unit.findById(word.unitId);
@@ -255,142 +253,6 @@ async function findMatchingUnits(resultData:any) {
             });
         }
     }
-
     return { correct, incorrect };
 }
-
-
 export default new EndController();
-
-// import { Request, Response } from 'express';
-// import Book from '../schemas/book.schema.js';
-// import Unit from '../schemas/unit.schema.js';
-// import mongoose from 'mongoose';
-
-// interface DataItem {
-//     _id: string;
-//     engWord: string;
-//     uzbWord: string;
-//     unitId: string;
-//     variants: string[];
-//     inFact: string;
-//     question: string;
-//     role: string;
-//     answer?: string;
-// }
-
-// interface ResultItem {
-//     count: number;
-//     words: DataItem[];
-// }
-
-// interface Result {
-//     correct: ResultItem;
-//     incorrect: ResultItem;
-// }
-
-// class EndController {
-//     public async end(req: Request, res: Response) {
-//         const { token } = req.headers;
-//         const { id: userId } = jwt.verify(token, process.env.JWT_SECRET);
-
-//         let data = req.body;
-//         try {
-//             function processItems(data: DataItem[]): Result {
-//                 const correct: ResultItem = { count: 0, words: [] };
-//                 const incorrect: ResultItem = { count: 0, words: [] };
-
-//                 for (const item of data) {
-//                     if (item.inFact == item.answer) {
-//                         correct.count++;
-//                         correct.words.push(item);
-//                     } else if (item.answer) {
-//                         incorrect.count++;
-//                         incorrect.words.push(item);
-//                     }
-//                 }
-
-//                 return { correct, incorrect };
-//             }
-
-//             const result = processItems(data);
-
-//             const bookIds = [
-//                 ...new Set([
-//                     ...result.correct.words.map((item) => item.unitId),
-//                     ...result.incorrect.words.map((item) => item.unitId),
-//                 ]),
-//             ];
-
-//             const books = await Book.find({
-//                 unitId: { $in: bookIds.map((id) => mongoose.Types.ObjectId(id)) },
-//             });
-
-//             const correctWords = result.correct.words.map((word) => {
-//                 return { ...word, userId };
-//             });
-
-//             const incorrectWords = result.incorrect.words.map((word) => {
-//                 return { ...word, userId };
-//             });
-
-//             const schema = new mongoose.Schema({
-//                 userId: String,
-//                 wordId: String,
-//                 unitId: String,
-//                 engWord: String,
-//                 uzbWord: String,
-//                 question: String,
-//                 role: String,
-//             });
-
-//             const CorrectModel = mongoose.model('Correct', schema, 'correct');
-//             const IncorrectModel = mongoose.model(
-//                 'Incorrect',
-//                 schema,
-//                 'incorrect'
-//             );
-
-//             await CorrectModel.insertMany(
-//                 correctWords.map((word) => {
-//                     const book = books.find((b) => b.unitId == word.unitId);
-//                     return {
-//                         userId: word.userId,
-//                         wordId: word._id,
-//                         unitId: word.unitId,
-//                         engWord: word.engWord,
-//                         uzbWord: word.uzbWord,
-//                         question: word.question,
-//                         role: word.role,
-//                         bookName: book?.name || '',
-//                     };
-//                 })
-//             );
-
-//             await IncorrectModel.insertMany(
-//                 incorrectWords.map((word) => {
-//                     const book = books.find((b) => b.unitId == word.unitId);
-//                     return {
-//                         userId: word.userId,
-//                         wordId: word._id,
-//                         unitId: word.unitId,
-//                         engWord: word.engWord,
-//                         uzbWord: word.uzbWord,
-//                         question: word.question,
-//                         role: word.role,
-//                         bookName: book?.name || '',
-//                     };
-//                 })
-//             );
-
-//             res.send({
-//                 correct: result.correct,
-//                 incorrect: result.incorrect,
-//             });
-//         } catch (error: unknown) {
-//             res.status(500).json({ success: false, error: (error as Error).message });
-//         }
-//     }
-// }
-
-// export default new EndController();
