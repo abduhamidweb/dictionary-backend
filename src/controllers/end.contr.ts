@@ -91,14 +91,14 @@ class EndController {
             const books = await Book.find();
 
             const booksName = books
-                .filter((book) =>
-                    book.units.some((unitId) => unitIds.includes(unitId.toString()))
-                )
-                .map((book) => ({
-                    bookname: book.bookname,
-                }));
+            .filter((book) =>
+            book.units.some((unitId) => unitIds.includes(unitId.toString()))
+            )
+            .map((book) => ({
+                bookname: book.bookname,
+            }));
             let bookname = books.filter((book) =>
-                book.units.some((unitId) => unitIds.includes(unitId.toString()))
+            book.units.some((unitId) => unitIds.includes(unitId.toString()))
             ).map(book => {
                 return {
                     bookname: book.bookname
@@ -132,7 +132,7 @@ class EndController {
             // create information about the game
             // console.log('resultData :', resultData);
             
-       
+            
             res.send({
                 books: bookname,
                 correct: result.correct,
@@ -167,18 +167,15 @@ async function sendResultsToChannel(resultData: any, bookname: any, answerWithUn
     }
 }
 
-// Format results for Telegram message (customize as needed)
-
-// Format results for Telegram message (customize as needed)
 function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
     let message = `✅ Tog'ri: ${resultData.resultData.correct.count}\n`;
     message += `❌ Noto'g'ri: ${resultData.resultData.incorrect.count}\n\n`;
-    message += "📚 Kitob nomlari:\n";
+    // message += "📚 Kitob nomlari:\n";
 
-    for (const book of bookname) {
-        const bookname = book.bookname;
-        message += `    - ${bookname}\n`;
-    }
+    // for (const book of bookname) {
+    //     const bookname = book.bookname;
+    //     message += `    - ${bookname}\n`;
+    // }
     // Get unique unit names from correct and incorrect arrays
     const allUnitNames = [...new Set([...answerWithUnit.correct.map((item: any) => item.unitName), ...answerWithUnit.incorrect.map((item: any) => item.unitName)])];
 
@@ -188,7 +185,7 @@ function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
         const notFoundWords = answerWithUnit.incorrect.filter((item: any) => item.unitName === unitName);
 
         // Display unit name
-        message += `📚 Kitob nomi: ${unitName}\n`;
+        message += `📚 Unit nomi: ${unitName}\n`;
 
         // Display found words
         message += "✅ Topilgan so'zlar: ";

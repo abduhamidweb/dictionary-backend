@@ -5,13 +5,16 @@ import Book from '../schemas/book.schema.js';
 
 class UnitController {
     public async createUnit(req: Request, res: Response): Promise<void> {
-        const { unitname, description, words, bookId }: IUnit = req.body;
+        const { description, words, bookId }: IUnit = req.body;
         try {
+            let bookname = await Book.findById(bookId);
+            if (!bookname) throw new Error(`Book ${bookname} not found`);
+            let unitname = req.body.unitname += bookname.bookname
             const unit = new Unit({ unitname, description, words, bookId });
             await unit.save();
             await Book.findByIdAndUpdate(bookId, {
                 $push: {
-                    units: unit._id
+                    units: unit
                 }
             });
             res.status(201).json(unit);
