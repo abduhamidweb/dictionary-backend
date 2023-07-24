@@ -48,7 +48,7 @@ async function findUnitsByBookIdsAndUnitIds(books: any[], unitIds: any[]) {
     const matchingUnits: any[] = [];
     for (const book of books) {
         for (const unitId of book.units) {
-            if (unitIds.includes(unitId.toString())) { 
+            if (unitIds.includes(unitId.toString())) {
                 const units = await Unit.find();
                 const matchingUnit = units.find((unit: any) => unit._id.toString() === unitId.toString());
                 if (matchingUnit) {
@@ -94,8 +94,13 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
         return { ...obj, variants: shuffleArray(uzbWords, 3) };
     });
     let filterUzbWords = addedVariantsUzb.map((obj) => {
-        obj.variants.push(obj.uzbWord)
-        return obj
+        // console.log('!obj.variants.includes(obj.uzbWord :', !obj.variants.includes(obj.uzbWord));
+        if (!obj.variants.includes(obj.uzbWord)) {
+            obj.variants = shuffleArray(obj.variants, 2);
+            obj.variants.push(obj.uzbWord);
+            obj.variants = shuffleArray(obj.variants, 3);
+        }
+        return obj;
     });
     const deduplicatedArrayUzb = filterUzbWords.map(obj => {
         return {
@@ -103,19 +108,22 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
             variants: Array.from(new Set(obj.variants)),
             question: obj.engWord,
             inFact: obj.uzbWord,
-
             role: "uzb"
 
         };
     });
-
+shuffledArray
     // inglizcha test
     let addedVariantsEng = shuffledArray.map((obj) => {
         return { ...obj, variants: shuffleArray(engWords, 3) };
     });
     let filterEngWords = addedVariantsEng.map((obj) => {
-        obj.variants.push(obj.engWord)
-        return obj
+        if (!obj.variants.includes(obj.engWord)) {
+            obj.variants = shuffleArray(obj.variants, 2);
+            obj.variants.push(obj.engWord);
+            obj.variants = shuffleArray(obj.variants, 3);
+        }
+        return obj;
     });
     const deduplicatedArrayEng = filterEngWords.map(obj => {
         return {
@@ -127,32 +135,41 @@ async function findWordsByUnitIdsAndWordCount(units: any[], wordCount: number, s
         };
     });
     // ikkisidaham bor bo'lgan arraylarni render qilib chiqarish kerak.
-    const randomWords = shuffleArray(deduplicatedArrayEng.concat(deduplicatedArrayUzb), wordCount)
-    const deduplicatedRandomWords = randomWords.map(obj => {
-        let variants = [];
-
+    let randomWords = shuffleArray(deduplicatedArrayEng.concat(deduplicatedArrayUzb), wordCount)
+    let deduplicatedRandomWords = randomWords.map(obj => {
+        let variants: string[] = [];
+        let variantsUzb: string[] = [];
+        let variantsEng: string[] = [];
         if (obj.role === "eng") {
-            variants = shuffleArray(uzbWords, 3);
-            variants.push(obj.uzbWord);
+            variantsUzb = shuffleArray(uzbWords, 2);
+            variantsUzb.push(obj.uzbWord);
+            variantsUzb = Array.from(new Set(variantsUzb));
+            if (variantsUzb.length === 2) {
+                variantsUzb = [...variantsUzb, ...shuffleArray(shuffleArray(uzbWords, 1000), 1)]
+                variantsUzb = shuffleArray(variantsUzb, 3)
+                variantsUzb = shuffleArray(Array.from(new Set(variantsUzb)), 3);
+            }
         } else {
-            variants = shuffleArray(engWords, 3);
-            variants.push(obj.engWord);
+            variantsEng = shuffleArray(engWords, 2);
+            variantsEng.push(obj.engWord);
+            variantsEng = Array.from(new Set(variantsEng));
+            if (variantsEng.length === 2) {
+                variantsEng = [...variantsEng, ...shuffleArray(shuffleArray(engWords, 1000), 1)]
+                variantsEng = shuffleArray(variantsEng, 3)
+                variantsEng = shuffleArray(Array.from(new Set(variantsEng)), 3)
+            }
         }
-
+        variants = [...variantsEng, ...variantsUzb]
         variants = Array.from(new Set(variants)); // Takrorlangan variantlarni olib tashlash
-
         return {
             ...obj,
-            variants: variants,
+            variants: shuffleArray(shuffleArray(shuffleArray(variants, 3), 3), 3),
             question: obj.role === "eng" ? obj.engWord : obj.uzbWord,
             inFact: obj.role === "eng" ? obj.uzbWord : obj.engWord,
             role: "random"
         };
     });
 
-
-    // return qilayotganda deduplicatedArrayEng, deduplicatedArrayUzb, randomWords ni render qilsa o'ladi.
-    // user nechtadir so'zni so'rasa o'shancha so'z random bo'ladi.
     if (sort == "uzb") return deduplicatedArrayUzb
     else if (sort == "eng") return deduplicatedArrayEng
     else if (sort == "random") return deduplicatedRandomWords

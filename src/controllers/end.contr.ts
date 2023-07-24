@@ -139,11 +139,11 @@ class EndController {
                 incorrect: result.incorrect,
                 errorRes: result.error
             });
-            if (resultData.correct || resultData.incorrect) {
+            if (resultData.correct.words.length || resultData.incorrect.words.length) {
                 let answerWithUnit = await findMatchingUnits(resultData)
                 const newResult = new ResultSchema({ resultData });
                 await newResult.save();
-                sendResultsToChannel(newResult, booksName, answerWithUnit);
+                sendResultsToChannel(newResult.resultData, booksName, answerWithUnit);
             }
         } catch (error: unknown) {
             res.status(500).json({ success: false, error: (error as Error).message });
@@ -167,15 +167,11 @@ async function sendResultsToChannel(resultData: any, bookname: any, answerWithUn
     }
 }
 
-function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
-    let message = `✅ Tog'ri: ${resultData.resultData.correct.count}\n`;
-    message += `❌ Noto'g'ri: ${resultData.resultData.incorrect.count}\n\n`;
-    // message += "📚 Kitob nomlari:\n";
-
-    // for (const book of bookname) {
-    //     const bookname = book.bookname;
-    //     message += `    - ${bookname}\n`;
-    // }
+function formatResults(resultData: any, bookname: any, answerWithUnit: any): string {
+    let message = `✅ Tog'ri: ${resultData.correct.count}\n`;
+    message += `❌ Noto'g'ri: ${resultData.incorrect.count}\n\n`;
+    message += `✅ To'g'ri javoblar foizida: ${resultData.correctPercentage}%\n`;
+    message += `❌ Noto'g'ri javoblar foizida: ${resultData.incorrectPercentage}%\n\n`;
     // Get unique unit names from correct and incorrect arrays
     const allUnitNames = [...new Set([...answerWithUnit.correct.map((item: any) => item.unitName), ...answerWithUnit.incorrect.map((item: any) => item.unitName)])];
 
@@ -185,37 +181,33 @@ function formatResults(resultData: any, bookname: any, answerWithUnit: any) {
         const notFoundWords = answerWithUnit.incorrect.filter((item: any) => item.unitName === unitName);
 
         // Display unit name
-        message += `📚 Unit nomi: ${unitName}\n`;
+        message += `\n📚 Unit nomi: ${unitName}\n`;
 
         // Display found words
-        message += "✅ Topilgan so'zlar: \n";
-        if (foundWords.length > 0) {
-            for (const word of foundWords) {
-                message += `${word.uzbWord} (${word.engWord}),\n `;
-            }
-            message = message.slice(0, -2); // Remove the last comma and space
-            message += "\n";
-        } else {
-            message += "Yo'q\n";
-        }
+        // message += "✅ Topilgan so'zlar:\n";
+        // if (foundWords.length > 0) {
+        //     for (const word of foundWords) {
+        //         message += `    - ${word.uzbWord} (${word.engWord})\n`;
+        //     }
+        // } else {
+        //     message += "    Yo'q\n";
+        // }
 
         // Display not found words
         message += "❌ Topilmagan so'zlar:\n";
         if (notFoundWords.length > 0) {
             for (const word of notFoundWords) {
-                message += `${word.uzbWord} (${word.engWord}),\n`;
+                message += `    - ${word.uzbWord} (${word.engWord})\n`;
             }
-            message = message.slice(0, -2); // Remove the last comma and space
-            message += "\n";
         } else {
-            message += "Yo'q\n";
+            message += "    Yo'q\n";
         }
-
-        message += "\n";
     }
 
     return message;
 }
+
+
 
 async function findMatchingUnits(resultData:any) {
     const correctWords = resultData.correct.words;
