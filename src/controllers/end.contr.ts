@@ -60,7 +60,6 @@ class EndController {
                         error.push(item);
                     }
                 }
-
                 const correctCount = correct.count;
                 const incorrectCount = incorrect.count;
                 const totalCount = correctCount + incorrectCount;

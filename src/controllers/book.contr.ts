@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Book from '../schemas/book.schema.js';
+import Words from '../schemas/word.schema.js';
 import { IBook } from '../interface/interface';
 class BookController {
     public async createBook(req: Request, res: Response): Promise<void> {
@@ -15,7 +16,13 @@ class BookController {
 
     public async getAllBooks(req: Request, res: Response): Promise<void> {
         try {
-            const books: IBook[] | null = await Book.find();
+            const books: IBook[] | null = await Book.find().populate({
+                path: 'units',
+                populate: [
+                    { path: 'words', model:Words },
+                ],
+            })
+                .exec();
 
             res.status(200).json(books);
         } catch (error: unknown) {
