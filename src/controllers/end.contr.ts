@@ -167,8 +167,7 @@ async function sendResultsToChannel(resultData: any, bookname: any, answerWithUn
 }
 
 function formatResults(resultData: any, bookname: any, answerWithUnit: any): string {
-console.log('resultData :', resultData);
-    let message = `User: ${resultData.user}\n\n`; 
+    let message = `👳‍♂️ User: ${resultData.user}\n\n`; 
     message += `✅ Tog'ri: ${resultData.correct.count}\n`;
     message += `❌ Noto'g'ri: ${resultData.incorrect.count}\n\n`;
     message += `✅ To'g'ri javoblar foizida: ${resultData.correctPercentage}%\n`;
